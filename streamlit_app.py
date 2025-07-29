@@ -89,7 +89,7 @@ def initialize_session_state():
         st.session_state.topic_model = None
 
 def authenticate_drive():
-    """Función para autenticar con OAuth usando credentials.json"""
+    """Función para autenticar con OAuth usando secrets.toml"""
     try:
         if st.session_state.topic_model is None:
             st.session_state.topic_model = GoogleDriveTopicModelling(language='spanish')
@@ -97,27 +97,38 @@ def authenticate_drive():
         # Verificar si las credenciales OAuth están en st.secrets
         if "oauth_credentials" not in st.secrets:
             st.error("❌ No se encontraron credenciales OAuth en los secrets")
-            st.info("💡 Configura [oauth_credentials] en tu archivo secrets.toml")
             return False
         
-        # Obtener credenciales OAuth desde secrets
+        # Crear credentials.json temporal desde secrets
         oauth_info = st.secrets["oauth_credentials"]
         
-        # Crear archivo temporal con las credenciales
-        credentials_dict = {
+        credentials_content = {
             "installed": {
                 "client_id": oauth_info["client_id"],
                 "project_id": oauth_info["project_id"],
-                "auth_uri": oauth_info["auth_uri"],
-                "token_uri": oauth_info["token_uri"],
-                "auth_provider_x509_cert_url": oauth_info["auth_provider_x509_cert_url"],
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
                 "client_secret": oauth_info["client_secret"],
-                "redirect_uris": oauth_info["redirect_uris"]
+                "redirect_uris": ["http://localhost"]
             }
         }
         
-        # Usar el método OAuth de tu clase original
-        st.session_state.topic_model.authenticate_google_drive()
+        # Crear archivo temporal
+        import json
+        with open("temp_credentials.json", "w") as f:
+            json.dump(credentials_content, f)
+        
+        # Usar el método OAuth original con el archivo temporal
+        st.session_state.topic_model.authenticate_google_drive(
+            credentials_file="temp_credentials.json",
+            token_file="temp_token.json"
+        )
+        
+        # Limpiar archivos temporales
+        import os
+        if os.path.exists("temp_credentials.json"):
+            os.remove("temp_credentials.json")
         
         st.success("🔐 Autenticación OAuth exitosa!")
         return True
@@ -125,6 +136,7 @@ def authenticate_drive():
     except Exception as e:
         st.error(f"❌ Error de autenticación OAuth: {str(e)}")
         return False
+        
 
 def process_diplomados():
     """Función principal para procesar los diplomados"""
@@ -139,9 +151,10 @@ def process_diplomados():
         # Autenticar si no está autenticado
         if st.session_state.topic_model is None or st.session_state.topic_model.service is None:
             status_container.info("🔐 Autenticando con Google Drive...")
-            if not authenticate_drive():
-                st.error("❌ Error en la autenticación. Verifica tus credenciales.")
-                return False
+            if st.session_state.topic_model is None or st.session_state.topic_model.service is None:
+                if not authenticate_drive():
+                    st.error("❌ Error en la autenticación. Verifica tus credenciales.")
+                    return False
         
         progress_bar.progress(20)
         
