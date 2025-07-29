@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import io
+import json
 from datetime import datetime
 import traceback
 
@@ -83,14 +84,70 @@ def initialize_session_state():
     if 'topic_model' not in st.session_state:
         st.session_state.topic_model = None
 
+def setup_google_credentials():
+    """Configura las credenciales de Google Drive desde los secrets de Streamlit"""
+    try:
+        # Obtener las credenciales desde st.secrets
+        if "google_credentials" in st.secrets:
+            credentials_info = st.secrets["google_credentials"]
+            
+            # Crear el archivo credentials.json temporalmente
+            credentials_dict = {
+                "type": credentials_info.get("type"),
+                "project_id": credentials_info.get("project_id"),
+                "private_key_id": credentials_info.get("private_key_id"),
+                "private_key": credentials_info.get("private_key").replace('\\n', '\n'),
+                "client_email": credentials_info.get("client_email"),
+                "client_id": credentials_info.get("client_id"),
+                "auth_uri": credentials_info.get("auth_uri"),
+                "token_uri": credentials_info.get("token_uri"),
+                "auth_provider_x509_cert_url": credentials_info.get("auth_provider_x509_cert_url"),
+                "client_x509_cert_url": credentials_info.get("client_x509_cert_url"),
+                "universe_domain": credentials_info.get("universe_domain", "googleapis.com")
+            }
+            
+            # Si es service account, usar esas credenciales directamente
+            if credentials_dict.get("type") == "service_account":
+                return "service_account", credentials_dict
+            else:
+                # Si es OAuth, crear el archivo credentials.json
+                with open('credentials.json', 'w') as f:
+                    json.dump(credentials_dict, f)
+                return "oauth", 'credentials.json'
+        else:
+            st.error("No se encontraron credenciales de Google en los secrets de Streamlit")
+            return None, None
+            
+    except Exception as e:
+        st.error(f"Error al configurar credenciales: {str(e)}")
+        return None, None
+
 def authenticate_drive():
     """Función para autenticar con Google Drive"""
     try:
         if st.session_state.topic_model is None:
             st.session_state.topic_model = GoogleDriveTopicModelling(language='spanish')
         
-        # Intentar autenticación
-        st.session_state.topic_model.authenticate_google_drive()
+        # Configurar credenciales
+        cred_type, cred_data = setup_google_credentials()
+        
+        if cred_type == "service_account":
+            # Usar autenticación de service account
+            from google.oauth2 import service_account
+            from googleapiclient.discovery import build
+            
+            credentials = service_account.Credentials.from_service_account_info(
+                cred_data, scopes=st.session_state.topic_model.SCOPES
+            )
+            st.session_state.topic_model.service = build('drive', 'v3', credentials=credentials)
+            st.success("🔐 Autenticación con Service Account exitosa!")
+        elif cred_type == "oauth":
+            # Usar autenticación OAuth (requiere interacción del usuario)
+            st.session_state.topic_model.authenticate_google_drive()
+        else:
+            st.error("❌ No se pudieron configurar las credenciales")
+            return False
+        
         return True
     except Exception as e:
         st.error(f"Error de autenticación: {str(e)}")
@@ -107,7 +164,7 @@ def process_diplomados():
         progress_bar.progress(10)
         
         # Autenticar si no está autenticado
-        if st.session_state.topic_model is None:
+        if st.session_state.topic_model is None or st.session_state.topic_model.service is None:
             status_container.info("🔐 Autenticando con Google Drive...")
             if not authenticate_drive():
                 st.error("❌ Error en la autenticación. Verifica tus credenciales.")
@@ -136,11 +193,6 @@ def process_diplomados():
             st.session_state.result_df = result_df
             st.session_state.processing_complete = True
             st.session_state.processing_status = "success"
-            
-            # Guardar archivo local
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_filename = f"resultados_diplomados_{timestamp}.xlsx"
-            result_df.to_excel(output_filename, index=False)
             
             status_container.success("✅ Procesamiento completado exitosamente!")
             progress_bar.progress(100)
@@ -203,10 +255,10 @@ def main():
         # Información del estado
         st.header("📊 Estado del Sistema")
         
-        if st.session_state.topic_model is not None:
-            st.success("✅ Modelo inicializado")
+        if st.session_state.topic_model is not None and hasattr(st.session_state.topic_model, 'service') and st.session_state.topic_model.service is not None:
+            st.success("✅ Modelo autenticado")
         else:
-            st.info("⏳ Modelo no inicializado")
+            st.info("⏳ Modelo no autenticado")
         
         if st.session_state.processing_complete:
             st.success("✅ Procesamiento completo")
