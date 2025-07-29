@@ -680,7 +680,31 @@ class GoogleDriveTopicModelling:
             diplomado_counts = df['Diplomado'].value_counts()
             for diplomado, count in diplomado_counts.items():
                 print(f"  - {diplomado}: {count} proyectos")
-            
+
+            try:
+                import io
+                output_buffer = io.BytesIO()
+                with pd.ExcelWriter(output_buffer, engine='openpyxl') as writer:
+                    df.to_excel(writer, sheet_name='Resultados', index=False)
+                
+                temp_filename = "temp_resultados_keywords.xlsx"
+                with open(temp_filename, 'wb') as f:
+                    f.write(output_buffer.getvalue())
+                
+                uploaded_file_id = self.upload_excel_to_drive(
+                    temp_filename, 
+                    parent_folder_id, 
+                    "Resultados_Keywords.xlsx"
+                )
+                
+                os.remove(temp_filename)
+                
+                if uploaded_file_id:
+                    print(f"✅ Excel subido automáticamente a Google Drive")
+                
+            except Exception as e:
+                print(f"❌ Error al subir Excel a Drive: {e}")
+                
             return df
         else:
             print("No se procesaron proyectos exitosamente")
