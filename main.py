@@ -58,9 +58,27 @@ class GoogleDriveTopicModelling:
         self.SCOPES = ['https://www.googleapis.com/auth/drive']
         self.service = None
         
+    def authenticate_with_service_account(self, credentials_dict):
+        """
+        Autentica con Google Drive API usando credenciales de service account
+        
+        Args:
+            credentials_dict (dict): Diccionario con las credenciales del service account
+        """
+        try:
+            credentials = service_account.Credentials.from_service_account_info(
+                credentials_dict, scopes=self.SCOPES
+            )
+            self.service = build('drive', 'v3', credentials=credentials)
+            print("Autenticación con Service Account exitosa!")
+            return True
+        except Exception as e:
+            print(f"Error en autenticación con service account: {e}")
+            return False
+        
     def authenticate_google_drive(self, credentials_file='credentials.json', token_file='token.json'):
         """
-        Autentica con Google Drive API con manejo mejorado de errores
+        Autentica con Google Drive API con manejo mejorado de errores (OAuth)
         
         Args:
             credentials_file (str): Ruta al archivo credentials.json descargado de Google Cloud Console
@@ -630,7 +648,7 @@ class GoogleDriveTopicModelling:
             pd.DataFrame: DataFrame con todos los resultados
         """
         if not self.service:
-            raise Exception("Primero debes autenticarte con Google Drive usando authenticate_google_drive()")
+            raise Exception("Primero debes autenticarte con Google Drive")
         
         # Encontrar todas las carpetas de diplomados
         diplomado_folders = self.find_diplomado_folders(parent_folder_id)
@@ -800,7 +818,7 @@ if __name__ == "__main__":
         result_df.to_excel(output_filename, index=False)
         print(f"\nResultados guardados en '{output_filename}'")
         
-        #Meter el excel a la carpeta
+        # Subir el excel a la carpeta
         topic_model = GoogleDriveTopicModelling(language='spanish')
         topic_model.authenticate_google_drive()
         parent_folder_id = "1-_W-Esk4lzkztPSeZpqO4Gq3ao1P9XKo"
@@ -821,4 +839,3 @@ if __name__ == "__main__":
         
     else:
         print("No se procesaron documentos exitosamente.")
-        
