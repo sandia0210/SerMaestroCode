@@ -5,12 +5,11 @@ import docx
 import pandas as pd
 import numpy as np
 from collections import Counter, defaultdict
-#
+
 # Procesamiento de texto
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
 
 # Google Drive API
 from googleapiclient.discovery import build
@@ -20,11 +19,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.http import MediaIoBaseDownload
 from google.oauth2 import service_account
 
-# Topic Modelling y extracción de palabras clave
-import gensim
-from gensim import corpora
-from gensim.models import LdaModel
-from gensim.models import CoherenceModel
+# Solo KeyBERT para extracción de palabras clave
 from keybert import KeyBERT
 
 # Descargar recursos de NLTK si no están presentes
@@ -42,11 +37,6 @@ try:
     nltk.data.find('corpora/stopwords')
 except LookupError:
     nltk.download('stopwords')
-    
-try:
-    nltk.data.find('corpora/wordnet')
-except LookupError:
-    nltk.download('wordnet')
 
 
 class GoogleDriveTopicModelling:
@@ -60,7 +50,7 @@ class GoogleDriveTopicModelling:
         self.language = language
         # Configurar stopwords según el idioma
         self.stop_words = set(stopwords.words(language if language != 'spanish' else 'spanish'))
-        self.lemmatizer = WordNetLemmatizer()
+        
         # Inicializar KeyBERT
         self.keybert_model = KeyBERT()
         
@@ -502,10 +492,6 @@ class GoogleDriveTopicModelling:
         # Eliminar stopwords y palabras cortas
         tokens = [token for token in tokens if token not in self.stop_words and len(token) > 2]
         
-        # Lematizar las palabras
-        if self.language == 'english':
-            tokens = [self.lemmatizer.lemmatize(token) for token in tokens]
-        
         return tokens
     
     def extract_keywords_keybert(self, text, top_n=10):
@@ -745,31 +731,6 @@ class GoogleDriveTopicModelling:
             return None
 
 
-def reset_auth_and_run_multi():
-    """
-    Función para resetear autenticación y ejecutar el script para múltiples diplomados
-    """
-    print("=== RESETEANDO AUTENTICACIÓN ===")
-    topic_model = GoogleDriveTopicModelling(language='spanish')
-    topic_model.reset_authentication() # Elimina token.json
-    
-    try:
-        # Forzar nueva autenticación
-        topic_model.authenticate_google_drive()
-        
-        # ID de la carpeta padre (que contiene los diplomados)
-        parent_folder_id = "1-_W-Esk4lzkztPSeZpqO4Gq3ao1P9XKo"  # Cambiar por tu ID
-        
-        # Procesar todos los diplomados
-        result_df = topic_model.process_all_diplomados(parent_folder_id, top_keywords=5)
-        
-        return result_df
-        
-    except Exception as e:
-        print(f"Error: {e}")
-        return pd.DataFrame()
-
-
 def main():
     """
     Función principal que ejecuta el procesamiento automáticamente para múltiples diplomados
@@ -795,6 +756,31 @@ def main():
             print("\n=== SOLUCIÓN SUGERIDA ===")
             print("El error 'invalid_grant' indica que tu token ha expirado.")
             print("Ejecuta: reset_auth_and_run_multi() para solucionarlo.")
+        return pd.DataFrame()
+
+
+def reset_auth_and_run_multi():
+    """
+    Función para resetear autenticación y ejecutar el script para múltiples diplomados
+    """
+    print("=== RESETEANDO AUTENTICACIÓN ===")
+    topic_model = GoogleDriveTopicModelling(language='spanish')
+    topic_model.reset_authentication() # Elimina token.json
+    
+    try:
+        # Forzar nueva autenticación
+        topic_model.authenticate_google_drive()
+        
+        # ID de la carpeta padre (que contiene los diplomados)
+        parent_folder_id = "1-_W-Esk4lzkztPSeZpqO4Gq3ao1P9XKo"  # Cambiar por tu ID
+        
+        # Procesar todos los diplomados
+        result_df = topic_model.process_all_diplomados(parent_folder_id, top_keywords=5)
+        
+        return result_df
+        
+    except Exception as e:
+        print(f"Error: {e}")
         return pd.DataFrame()
 
 
@@ -828,7 +814,6 @@ if __name__ == "__main__":
         if uploaded_file_id:
             print(f"✅ Archivo también guardado en Google Drive")
 
-
         # Mostrar estadísticas finales
         print(f"\nEstadísticas finales:")
         print(f"- Total de proyectos: {len(result_df)}")
@@ -836,3 +821,4 @@ if __name__ == "__main__":
         
     else:
         print("No se procesaron documentos exitosamente.")
+        
