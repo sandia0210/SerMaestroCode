@@ -15,7 +15,7 @@ from main import GoogleDriveTopicModelling
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Repositorio de Proyectos Ser Maestro",
+    page_title="Repositorio de Proyectos",
     page_icon="📚",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -200,12 +200,14 @@ def main():
     # Header verde simple
     st.markdown("""
     <div class="header-container">
-        <h1 class="header-title">Repositorio de Proyectos SER MAESTRO</h1>
+        <h1 class="header-title">Repositorio de Proyectos</h1>
     </div>
     """, unsafe_allow_html=True)
     
     # Sidebar para procesamiento
     with st.sidebar:
+        st.image("logo.png", width=200)
+     
         st.header("⚙️ Configuración")
         
         if not st.session_state.processing_complete:
