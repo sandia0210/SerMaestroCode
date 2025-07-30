@@ -15,219 +15,76 @@ from main import GoogleDriveTopicModelling
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Repositorio de Proyectos - Ser Maestro",
-    page_icon="🌱",
+    page_title="Repositorio de Proyectos",
+    page_icon="📚",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# CSS personalizado para el nuevo diseño
+# CSS súper simple - solo lo esencial
 st.markdown("""
 <style>
-    /* Fondo general */
     .main {
-        background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-        min-height: 100vh;
+        background-color: white;
     }
     
-    /* Header personalizado */
-    .custom-header {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
+    /* Header verde simple */
+    .header-container {
+        background-color: #5cb85c;
+        color: white;
         padding: 2rem;
-        margin-bottom: 2rem;
-        text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin: -1rem -1rem 2rem -1rem;
     }
     
     .header-title {
-        color: white;
-        font-size: 3rem;
+        font-size: 2.5rem;
         font-weight: bold;
         margin: 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     
-    .header-subtitle {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 1.2rem;
-        margin-top: 0.5rem;
-    }
-    
-    /* Sección de filtros */
+    /* Filtros */
     .filters-section {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        padding: 2rem;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .filters-title {
-        color: #2d6a4f;
-        font-size: 1.8rem;
-        font-weight: bold;
+        font-size: 1.5rem;
+        color: #666;
         margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
     }
     
-    /* Botones personalizados */
-    .stButton > button {
-        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        font-size: 1.1rem;
-        font-weight: bold;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        width: 100%;
-        box-shadow: 0 4px 15px rgba(45, 106, 79, 0.3);
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(45, 106, 79, 0.4);
-        background: linear-gradient(135deg, #40916c 0%, #52b788 100%);
-    }
-    
-    /* Botón de actualizar base de datos - estilo especial */
-    .update-button {
-        background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%) !important;
-        box-shadow: 0 4px 15px rgba(25, 118, 210, 0.3) !important;
-    }
-    
-    .update-button:hover {
-        background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%) !important;
-        box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4) !important;
-    }
-    
-    /* Resultados de proyectos */
-    .projects-section {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .projects-title {
-        color: #2d6a4f;
-        font-size: 1.8rem;
-        font-weight: bold;
-        margin-bottom: 1.5rem;
-    }
-    
-    /* Cards de proyectos */
-    .project-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-left: 4px solid #52b788;
-        transition: all 0.3s ease;
-    }
-    
-    .project-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    /* Resultados */
+    .result-item {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 5px;
     }
     
     .project-title {
-        color: #2d6a4f;
-        font-size: 1.3rem;
+        color: #337ab7;
         font-weight: bold;
         margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
     
     .project-keywords {
-        color: #666;
-        font-size: 0.95rem;
+        color: #f0ad4e;
         margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
     
     .project-link {
-        color: #1976d2;
-        text-decoration: none;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        color: #5cb85c;
     }
-    
-    .project-link:hover {
-        color: #2196f3;
-        text-decoration: underline;
-    }
-    
-    /* Multiselect personalizado */
-    .stMultiSelect > div > div {
-        background-color: white;
-        border-radius: 8px;
-    }
-    
-    /* Logo placeholder */
-    .logo-placeholder {
-        width: 120px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem auto;
-        border: 2px dashed rgba(255, 255, 255, 0.4);
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 0.9rem;
-    }
-    
-    /* Sidebar personalizado */
-    .css-1d391kg {
-        background: linear-gradient(180deg, #2d6a4f 0%, #40916c 100%);
-    }
-    
-    .css-1d391kg .css-1v0mbdj {
-        color: white;
-    }
-    
-    /* Progress bar personalizado */
-    .stProgress > div > div > div > div {
-        background: linear-gradient(90deg, #52b788, #40916c);
-    }
-    
-    /* Alertas personalizadas */
-    .stAlert {
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    /* Hide streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
 def initialize_session_state():
     """Inicializa las variables de estado de la sesión"""
-    if 'database_loaded' not in st.session_state:
-        st.session_state.database_loaded = False
-    if 'projects_df' not in st.session_state:
-        st.session_state.projects_df = pd.DataFrame()
+    if 'processing_complete' not in st.session_state:
+        st.session_state.processing_complete = False
+    if 'result_df' not in st.session_state:
+        st.session_state.result_df = pd.DataFrame()
     if 'topic_model' not in st.session_state:
         st.session_state.topic_model = None
     if 'all_keywords' not in st.session_state:
@@ -263,66 +120,39 @@ def authenticate_drive():
         st.error(f"❌ Error de autenticación: {str(e)}")
         return False
 
-def update_database():
-    """Función para actualizar la base de datos de proyectos"""
+def process_diplomados():
+    """Función principal para procesar los diplomados"""
     try:
-        # Crear contenedores para mostrar el progreso
-        status_container = st.empty()
-        progress_container = st.empty()
+        progress_bar = st.progress(0)
+        status_text = st.empty()
         
-        # Mostrar estado inicial con spinner más prominente
-        with status_container.container():
-            st.markdown("""
-            <div style='text-align: center; padding: 2rem; background: rgba(33, 150, 243, 0.1); border-radius: 15px; margin: 1rem 0;'>
-                <div style='font-size: 3rem; margin-bottom: 1rem;'>🔄</div>
-                <h3 style='color: #1976d2; margin: 0;'>Actualizando Base de Datos</h3>
-                <p style='color: #666; margin: 0.5rem 0;'>Por favor espera, este proceso puede tomar varios minutos...</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with progress_container.container():
-            progress_bar = st.progress(0)
-            st.markdown("<p style='text-align: center; color: #666;'>Iniciando proceso...</p>", unsafe_allow_html=True)
-        
-        # Paso 1: Autenticación
-        progress_bar.progress(10)
-        progress_container.markdown("<p style='text-align: center; color: #666;'>🔐 Autenticando con Google Drive...</p>", unsafe_allow_html=True)
-        
-        if st.session_state.topic_model is None or st.session_state.topic_model.service is None:
-            if not authenticate_drive():
-                status_container.error("❌ Error en la autenticación.")
-                return False
-        
-        # Paso 2: Configuración
+        status_text.text("🔐 Autenticando con Google Drive...")
         progress_bar.progress(20)
-        progress_container.markdown("<p style='text-align: center; color: #666;'>📁 Configurando acceso a archivos...</p>", unsafe_allow_html=True)
+        
+        if not authenticate_drive():
+            st.error("❌ Error en la autenticación")
+            return False
+        
+        status_text.text("📁 Buscando diplomados...")
+        progress_bar.progress(40)
         
         parent_folder_id = "1-_W-Esk4lzkztPSeZpqO4Gq3ao1P9XKo"
         
-        # Paso 3: Búsqueda de diplomados
-        progress_bar.progress(30)
-        progress_container.markdown("<p style='text-align: center; color: #666;'>🔍 Buscando diplomados...</p>", unsafe_allow_html=True)
-        
-        # Paso 4: Procesamiento principal
-        progress_bar.progress(40)
-        progress_container.markdown("<p style='text-align: center; color: #666;'>⚙️ Procesando documentos (esto puede tomar varios minutos)...</p>", unsafe_allow_html=True)
+        status_text.text("⚙️ Procesando documentos...")
+        progress_bar.progress(70)
         
         result_df = st.session_state.topic_model.process_all_diplomados(
             parent_folder_id, 
             top_keywords=5
         )
         
-        # Paso 5: Procesando resultados
-        progress_bar.progress(80)
-        progress_container.markdown("<p style='text-align: center; color: #666;'>📊 Organizando resultados...</p>", unsafe_allow_html=True)
-        
         if not result_df.empty:
-            st.session_state.projects_df = result_df
-            st.session_state.database_loaded = True
+            st.session_state.result_df = result_df
+            st.session_state.processing_complete = True
             
             # Extraer todas las keywords únicas
             all_keywords = set()
-            for i in range(1, 6):
+            for i in range(1, 6):  # keyword 1 a keyword 5
                 col_name = f'keyword {i}'
                 if col_name in result_df.columns:
                     keywords = result_df[col_name].dropna()
@@ -331,236 +161,123 @@ def update_database():
             
             st.session_state.all_keywords = sorted(list(all_keywords))
             
-            # Finalización exitosa
+            status_text.text("✅ Procesamiento completado!")
             progress_bar.progress(100)
-            progress_container.markdown("<p style='text-align: center; color: #666;'>✅ Proceso completado</p>", unsafe_allow_html=True)
-            
-            # Mostrar resultado exitoso
-            status_container.markdown("""
-            <div style='text-align: center; padding: 2rem; background: rgba(76, 175, 80, 0.1); border-radius: 15px; margin: 1rem 0;'>
-                <div style='font-size: 3rem; margin-bottom: 1rem;'>✅</div>
-                <h3 style='color: #4caf50; margin: 0;'>¡Base de Datos Actualizada!</h3>
-                <p style='color: #666; margin: 0.5rem 0;'>Se procesaron {} proyectos exitosamente</p>
-            </div>
-            """.format(len(result_df)), unsafe_allow_html=True)
-            
-            # Limpiar contenedores después de 3 segundos
-            import time
-            time.sleep(3)
-            status_container.empty()
-            progress_container.empty()
             
             return True
         else:
-            status_container.warning("⚠️ No se encontraron documentos para procesar.")
-            progress_container.empty()
+            st.error("⚠️ No se encontraron documentos para procesar")
             return False
             
     except Exception as e:
-        # Mostrar error prominente
-        status_container.markdown(f"""
-        <div style='text-align: center; padding: 2rem; background: rgba(244, 67, 54, 0.1); border-radius: 15px; margin: 1rem 0;'>
-            <div style='font-size: 3rem; margin-bottom: 1rem;'>❌</div>
-            <h3 style='color: #f44336; margin: 0;'>Error en la Actualización</h3>
-            <p style='color: #666; margin: 0.5rem 0;'>{str(e)}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        progress_container.empty()
+        st.error(f"❌ Error durante el procesamiento: {str(e)}")
         return False
 
 def search_projects(selected_keywords):
-    """Busca proyectos que contengan al menos una de las keywords seleccionadas"""
-    if st.session_state.projects_df.empty or not selected_keywords:
+    """Busca proyectos que contengan las keywords seleccionadas"""
+    if st.session_state.result_df.empty:
         return pd.DataFrame()
     
-    # Crear máscara para encontrar proyectos que contengan al menos una keyword
-    mask = pd.Series([False] * len(st.session_state.projects_df))
+    if not selected_keywords:
+        return pd.DataFrame()
     
-    for i, row in st.session_state.projects_df.iterrows():
-        project_keywords = []
-        for j in range(1, 6):
-            col_name = f'keyword {j}'
-            if col_name in row and pd.notna(row[col_name]) and row[col_name] != '':
-                project_keywords.append(row[col_name])
-        
-        # Verificar si alguna keyword seleccionada está en las keywords del proyecto
-        if any(keyword in project_keywords for keyword in selected_keywords):
-            mask.iloc[i] = True
+    # Filtrar proyectos que contengan alguna de las keywords seleccionadas
+    mask = pd.Series([False] * len(st.session_state.result_df))
     
-    return st.session_state.projects_df[mask]
-
-def display_project_card(project):
-    """Muestra una tarjeta de proyecto"""
-    # Obtener keywords del proyecto
-    keywords = []
-    for i in range(1, 6):
+    for i in range(1, 6):  # keyword 1 a keyword 5
         col_name = f'keyword {i}'
-        if col_name in project and pd.notna(project[col_name]) and project[col_name] != '':
-            keywords.append(project[col_name])
+        if col_name in st.session_state.result_df.columns:
+            mask = mask | st.session_state.result_df[col_name].isin(selected_keywords)
     
-    keywords_text = ', '.join(keywords) if keywords else 'Sin palabras clave'
-    
-    st.markdown(f"""
-    <div class="project-card">
-        <div class="project-title">
-            📚 {project['Título del proyecto']}
-        </div>
-        <div class="project-keywords">
-            🔑 <strong>Palabras clave:</strong> {keywords_text}
-        </div>
-        <a href="{project['Enlace de descarga']}" target="_blank" class="project-link">
-            🔗 Proyecto / documento: Enlace de descarga
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
+    filtered_df = st.session_state.result_df[mask]
+    return filtered_df
 
 def main():
-    """Función principal de la aplicación"""
+    """Función principal de la aplicación Streamlit"""
+    
     initialize_session_state()
     
-    # Header con logo placeholder
+    # Header verde simple
     st.markdown("""
-    <div class="custom-header">
-        <div class="logo-placeholder">
-            Logo aquí
-        </div>
+    <div class="header-container">
         <h1 class="header-title">Repositorio de Proyectos</h1>
-        <p class="header-subtitle">Comunidad de Aprendizaje</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar para configuración
+    # Sidebar para procesamiento
     with st.sidebar:
-        st.markdown("""
-        <div style='color: white; text-align: center; padding: 1rem;'>
-            <h2>⚙️ Configuración</h2>
-        </div>
-        """, unsafe_allow_html=True)
+        st.header("⚙️ Configuración")
         
-        # Botón de actualizar base de datos
-        st.markdown("### 📊 Base de Datos")
-        
-        # Verificar si hay una actualización en proceso
-        if 'updating_database' not in st.session_state:
-            st.session_state.updating_database = False
-        
-        # Botón con estado dinámico
-        button_text = "🔄 Actualizando..." if st.session_state.updating_database else "🔄 Actualizar Base de Datos"
-        button_disabled = st.session_state.updating_database
-        
-        if st.button(button_text, key="update_db", disabled=button_disabled, help="Procesa y actualiza todos los proyectos"):
-            st.session_state.updating_database = True
-            
-            # Mostrar mensaje prominente de carga
-            st.markdown("""
-            <div style='background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 1rem; margin: 1rem 0; border-radius: 8px;'>
-                <strong>⏳ Proceso en ejecución</strong><br>
-                <small>La actualización puede tomar varios minutos. Por favor, no cierres la ventana.</small>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Ejecutar actualización
-            success = update_database()
-            
-            # Resetear estado
-            st.session_state.updating_database = False
-            
-            if success:
-                st.rerun()  # Refrescar la página para mostrar los nuevos datos
-        
-        st.markdown("---")
-        
-        # Estado del sistema
-        st.markdown("### 📈 Estado del Sistema")
-        
-        if st.session_state.database_loaded:
-            st.success(f"✅ Base de datos cargada")
-            st.metric("Proyectos disponibles", len(st.session_state.projects_df))
-            st.metric("Keywords únicas", len(st.session_state.all_keywords))
+        if not st.session_state.processing_complete:
+            st.info("📋 Primero procesa los documentos")
+            if st.button("🔄 Actualizar Base de Datos", use_container_width=True):
+                with st.spinner("Procesando documentos..."):
+                    process_diplomados()
+                    st.rerun()
         else:
-            st.info("⏳ Base de datos no cargada")
-            st.info("💡 Haz clic en 'Actualizar Base de Datos' para cargar los proyectos")
+            st.success("✅ Base de datos actualizada")
+            st.metric("Proyectos encontrados", len(st.session_state.result_df))
+            st.metric("Keywords disponibles", len(st.session_state.all_keywords))
+            
+            if st.button("🔄 Reprocesar Documentos", use_container_width=True):
+                st.session_state.processing_complete = False
+                st.session_state.result_df = pd.DataFrame()
+                st.session_state.all_keywords = []
+                st.rerun()
     
-    # Sección de filtros
-    st.markdown("""
-    <div class="filters-section">
-        <div class="filters-title">
-            🔍 Filtros
-        </div>
-        <p style="color: #666; margin-bottom: 1.5rem;">Seleccione el eje temático</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Selector de keywords (solo si la base de datos está cargada)
-    selected_keywords = []
-    if st.session_state.database_loaded and st.session_state.all_keywords:
+    # Contenido principal
+    if not st.session_state.processing_complete:
+        st.info("📋 Haz clic en 'Actualizar Base de Datos' en el panel lateral para comenzar")
+    else:
+        # Sección de filtros
+        st.markdown('<div class="filters-section">', unsafe_allow_html=True)
+        st.markdown('<h2 class="filters-title">🔍 Filtros</h2>', unsafe_allow_html=True)
+        
+        st.text("Seleccione el eje temático")
+        
+        # Multiselect para keywords
         selected_keywords = st.multiselect(
-            "Selecciona palabras clave:",
+            "",
             options=st.session_state.all_keywords,
-            placeholder="Escribe o selecciona palabras clave...",
-            help="Puedes seleccionar múltiples palabras clave. Se mostrarán proyectos que contengan al menos una de ellas."
+            placeholder="Selecciona palabras clave...",
+            label_visibility="collapsed"
         )
-    elif not st.session_state.database_loaded:
-        st.info("💡 Primero actualiza la base de datos para ver las palabras clave disponibles")
-    
-    # Botón de búsqueda
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        search_clicked = st.button("🔍 Buscar Proyectos", disabled=not selected_keywords)
-    
-    # Sección de resultados
-    st.markdown("""
-    <div class="projects-section">
-        <div class="projects-title">Proyectos encontrados:</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Mostrar resultados
-    if search_clicked and selected_keywords:
-        with st.spinner("Buscando proyectos..."):
+        
+        # Botón de búsqueda
+        search_clicked = st.button("Buscar Proyectos", type="primary")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Mostrar resultados
+        if search_clicked or selected_keywords:
             filtered_projects = search_projects(selected_keywords)
             
             if not filtered_projects.empty:
-                st.success(f"Se encontraron {len(filtered_projects)} proyectos")
+                st.markdown("### Proyectos encontrados:")
                 
-                # Mostrar cada proyecto como una tarjeta
                 for _, project in filtered_projects.iterrows():
-                    display_project_card(project)
+                    # Obtener keywords del proyecto
+                    project_keywords = []
+                    for i in range(1, 6):
+                        col_name = f'keyword {i}'
+                        if col_name in project.index and project[col_name] and project[col_name].strip():
+                            project_keywords.append(project[col_name])
+                    
+                    # Crear el item de resultado
+                    st.markdown(f"""
+                    <div class="result-item">
+                        <div class="project-title">📋 Título del proyecto: "{project.get('Título del proyecto', 'Sin título')}"</div>
+                        <div class="project-keywords">🔑 Palabras clave: {', '.join(project_keywords)}</div>
+                        <div class="project-link">🔗 Proyecto / documento: <a href="{project.get('Enlace de descarga', '#')}" target="_blank">Enlace de descarga</a></div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.success(f"Se encontraron {len(filtered_projects)} proyectos")
             else:
-                st.warning("No se encontraron proyectos con las palabras clave seleccionadas")
-    
-    elif st.session_state.get('updating_database', False):
-        # Mostrar mensaje de carga en la sección principal también
-        st.markdown("""
-        <div style='text-align: center; padding: 3rem; background: rgba(255, 193, 7, 0.05); border-radius: 15px; margin: 2rem 0;'>
-            <div style='font-size: 4rem; margin-bottom: 1rem; animation: pulse 2s infinite;'>⏳</div>
-            <h2 style='color: #ff9800; margin: 0;'>Actualizando Base de Datos</h2>
-            <p style='color: #666; margin: 1rem 0; font-size: 1.1rem;'>Este proceso puede tomar varios minutos...</p>
-            <p style='color: #999; font-size: 0.9rem;'>Por favor, mantén esta ventana abierta hasta que termine</p>
-        </div>
-        
-        <style>
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        </style>
-        """, unsafe_allow_html=True)
-    
-    elif not st.session_state.database_loaded:
-        st.info("🚀 ¡Bienvenido al Repositorio de Proyectos!\n\nPara comenzar, actualiza la base de datos desde el panel lateral.")
-    
-    elif not selected_keywords and st.session_state.database_loaded:
-        st.info("📝 Selecciona palabras clave y haz clic en 'Buscar Proyectos' para ver los resultados.")
-    
-    # Footer
-    st.markdown("---")
-    st.markdown("""
-    <div style='text-align: center; color: rgba(255,255,255,0.8); padding: 20px;'>
-        <p>🌱 Repositorio de Proyectos - Ser Maestro | Comunidad de Aprendizaje</p>
-    </div>
-    """, unsafe_allow_html=True)
+                if selected_keywords:
+                    st.warning("No se encontraron proyectos con las palabras clave seleccionadas")
+        else:
+            st.info("Selecciona palabras clave y haz clic en 'Buscar Proyectos' para ver los resultados")
 
 if __name__ == "__main__":
     main()
