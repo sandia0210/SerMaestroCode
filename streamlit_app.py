@@ -63,18 +63,18 @@ st.markdown("""
     }
     
     .project-title {
-        color: #337ab7;
+        color: #1071b8;
         font-weight: bold;
         margin-bottom: 0.5rem;
     }
     
     .project-keywords {
-        color: #f0ad4e;
+        color: #1071b8;
         margin-bottom: 0.5rem;
     }
     
     .project-link {
-        color: #5cb85c;
+        color: #1071b8;
     }
 </style>
 """, unsafe_allow_html=True)
