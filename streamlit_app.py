@@ -200,7 +200,7 @@ def main():
     # Header verde simple
     st.markdown("""
     <div class="header-container">
-        <h1 class="header-title">Repositorio de Proyectos Ser Maestro</h1>
+        <h1 class="header-title">Repositorio de Proyectos SER MAESTRO</h1>
     </div>
     """, unsafe_allow_html=True)
     
