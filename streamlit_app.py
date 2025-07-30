@@ -235,7 +235,7 @@ def main():
         st.markdown('<div class="filters-section">', unsafe_allow_html=True)
         st.markdown('<h2 class="filters-title">🔍 Filtros</h2>', unsafe_allow_html=True)
         
-        st.text("Seleccione el eje temático")
+        st.text("Seleccione todos los temas que desea buscar")
         
         # Multiselect para keywords
         selected_keywords = st.multiselect(
