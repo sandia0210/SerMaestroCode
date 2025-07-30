@@ -63,18 +63,18 @@ st.markdown("""
     }
     
     .project-title {
-        color: #1071b8;
+        color: #000000;
         font-weight: bold;
         margin-bottom: 0.5rem;
     }
     
     .project-keywords {
-        color: #1071b8;
+        color: #000000;
         margin-bottom: 0.5rem;
     }
     
     .project-link {
-        color: #1071b8;
+        color: #000000;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -268,9 +268,9 @@ def main():
                     # Crear el item de resultado
                     st.markdown(f"""
                     <div class="result-item">
-                        <div class="project-title">📋<b> Título del proyecto: </b>"{project.get('Título del proyecto', 'Sin título')}"</div>
-                        <div class="project-keywords">🔑<b> Palabras clave:</b> {', '.join(project_keywords)}</div>
-                        <div class="project-link">🔗 <b>Proyecto / documento: </b><a href="{project.get('Enlace de descarga', '#')}" target="_blank">Enlace de descarga</a></div>
+                        <div class="project-title">📋<strong style='color:#001d57;'> Título del proyecto: </strong>"{project.get('Título del proyecto', 'Sin título')}"</div>
+                        <div class="project-keywords">🔑<strong style='color:#001d57;'> Palabras clave:</strong> {', '.join(project_keywords)}</div>
+                        <div class="project-link">🔗 <strong style='color:#001d57;'>Proyecto / documento: </strong><a href="{project.get('Enlace de descarga', '#')}" target="_blank">Enlace de descarga</a></div>
                     </div>
                     """, unsafe_allow_html=True)
                 
