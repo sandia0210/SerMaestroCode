@@ -268,9 +268,9 @@ def main():
                     # Crear el item de resultado
                     st.markdown(f"""
                     <div class="result-item">
-                        <div class="project-title">📋 Título del proyecto: "{project.get('Título del proyecto', 'Sin título')}"</div>
-                        <div class="project-keywords">🔑 Palabras clave: {', '.join(project_keywords)}</div>
-                        <div class="project-link">🔗 Proyecto / documento: <a href="{project.get('Enlace de descarga', '#')}" target="_blank">Enlace de descarga</a></div>
+                        <div class="project-title">📋<b> Título del proyecto: </b>"{project.get('Título del proyecto', 'Sin título')}"</div>
+                        <div class="project-keywords">🔑<b> Palabras clave:</b> {', '.join(project_keywords)}</div>
+                        <div class="project-link">🔗 <b>Proyecto / documento: </b><a href="{project.get('Enlace de descarga', '#')}" target="_blank">Enlace de descarga</a></div>
                     </div>
                     """, unsafe_allow_html=True)
                 
