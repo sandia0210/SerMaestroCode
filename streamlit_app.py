@@ -89,54 +89,59 @@ def initialize_session_state():
         st.session_state.topic_model = None
 
 def authenticate_drive():
-    """Función para autenticar con OAuth usando secrets.toml"""
+    """Función mejorada para autenticar con Google Drive usando secrets de Streamlit"""
     try:
+        # Inicializar el modelo si no existe
         if st.session_state.topic_model is None:
             st.session_state.topic_model = GoogleDriveTopicModelling(language='spanish')
         
-        # Verificar si las credenciales OAuth están en st.secrets
-        if "oauth_credentials" not in st.secrets:
-            st.error("❌ No se encontraron credenciales OAuth en los secrets")
+        # Verificar si las credenciales están en st.secrets
+        if "google_credentials" not in st.secrets:
+            st.error("❌ No se encontraron credenciales de Google en los secrets de Streamlit")
+            st.info("💡 Asegúrate de configurar [google_credentials] en tu archivo secrets.toml")
             return False
         
-        # Crear credentials.json temporal desde secrets
-        oauth_info = st.secrets["oauth_credentials"]
+        # Obtener las credenciales desde st.secrets
+        credentials_info = st.secrets["google_credentials"]
         
-        credentials_content = {
-            "installed": {
-                "client_id": oauth_info["client_id"],
-                "project_id": oauth_info["project_id"],
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_secret": oauth_info["client_secret"],
-                "redirect_uris": ["http://localhost"]
-            }
-        }
+        # Construir el diccionario de credenciales
+        credentials_dict = {}
+        for key, value in credentials_info.items():
+            if key == "private_key":
+                # Manejar correctamente los saltos de línea en la clave privada
+                credentials_dict[key] = value.replace('\\n', '\n')
+            else:
+                credentials_dict[key] = value
         
-        # Crear archivo temporal
-        import json
-        with open("temp_credentials.json", "w") as f:
-            json.dump(credentials_content, f)
-        
-        # Usar el método OAuth original con el archivo temporal
-        st.session_state.topic_model.authenticate_google_drive(
-            credentials_file="temp_credentials.json",
-            token_file="temp_token.json"
+        # Crear credenciales usando service account
+        credentials = service_account.Credentials.from_service_account_info(
+            credentials_dict, 
+            scopes=st.session_state.topic_model.SCOPES
         )
         
-        # Limpiar archivos temporales
-        import os
-        if os.path.exists("temp_credentials.json"):
-            os.remove("temp_credentials.json")
+        # Crear el servicio de Google Drive
+        st.session_state.topic_model.service = build('drive', 'v3', credentials=credentials)
         
-        st.success("🔐 Autenticación OAuth exitosa!")
+        st.success("🔐 Autenticación con Service Account exitosa!")
         return True
         
-    except Exception as e:
-        st.error(f"❌ Error de autenticación OAuth: {str(e)}")
+    except KeyError as e:
+        st.error(f"❌ Falta la clave '{e}' en las credenciales de Google")
+        st.info("💡 Verifica que todas las claves necesarias estén en tu secrets.toml")
         return False
+    except Exception as e:
+        st.error(f"❌ Error de autenticación: {str(e)}")
         
+        # Mostrar información de debug en modo expandible
+        with st.expander("🔍 Ver detalles del error"):
+            st.code(traceback.format_exc())
+            
+            # Mostrar qué claves están disponibles
+            if "google_credentials" in st.secrets:
+                available_keys = list(st.secrets["google_credentials"].keys())
+                st.write("Claves disponibles en secrets:", available_keys)
+        
+        return False
 
 def process_diplomados():
     """Función principal para procesar los diplomados"""
@@ -151,10 +156,9 @@ def process_diplomados():
         # Autenticar si no está autenticado
         if st.session_state.topic_model is None or st.session_state.topic_model.service is None:
             status_container.info("🔐 Autenticando con Google Drive...")
-            if st.session_state.topic_model is None or st.session_state.topic_model.service is None:
-                if not authenticate_drive():
-                    st.error("❌ Error en la autenticación. Verifica tus credenciales.")
-                    return False
+            if not authenticate_drive():
+                st.error("❌ Error en la autenticación. Verifica tus credenciales.")
+                return False
         
         progress_bar.progress(20)
         
