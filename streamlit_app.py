@@ -26,7 +26,7 @@ st.markdown("""
 <style>
     /* Fondo general */
     .main {
-        background: linear-gradient(135deg, #3e8e2c 0%, #4faf34 100%);
+        background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
         min-height: 100vh;
     }
     
