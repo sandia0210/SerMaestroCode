@@ -25,12 +25,12 @@ st.set_page_config(
 st.markdown("""
 <style>
     .main {
-        background-color: white;
+        background-color: #4faf34;
     }
     
     /* Header verde simple */
     .header-container {
-        background-color: #5cb85c;
+        background-color: #4faf34;
         color: white;
         padding: 2rem;
         margin: -1rem -1rem 2rem -1rem;
